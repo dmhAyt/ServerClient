@@ -1,6 +1,16 @@
 package com.ansheng.single;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.locks.ReentrantLock;
+
 import com.ansheng.config.FileWorkerConfig;
+import com.ansheng.exception.ReadTimeOutException;
 import com.ansheng.factory.CreateSocketInt;
 import com.ansheng.factory.SystemInfoInt;
 import com.ansheng.factory.SystemPlatformFactory;
@@ -19,33 +29,25 @@ import com.ansheng.util.OSInfo;
 import com.ansheng.util.Tools;
 import com.ansheng.util.socket.SocketTools;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.*;
-
 public class HeartSingle {
 
     private static HeartSingle _instance = null;
     private static final ReentrantLock _objLock = new ReentrantLock();
     private static HeartManageMonitorThread _heartManage = null;
     /**
-     * 组长或者副组长管理组员们的心跳socket
+     * 缁勯暱鎴栬�呭壇缁勯暱绠＄悊缁勫憳浠殑蹇冭烦socket
      */
     private static ConcurrentSkipListSet<HeartKVModel> _heartSocketList = new ConcurrentSkipListSet<>();
     /**
-     * 副组长的心跳信息
+     * 鍓粍闀跨殑蹇冭烦淇℃伅
      */
     private static ConcurrentHashMap<String,HeartBeatModel> _heartSLeaderData = new ConcurrentHashMap<>(10);
     /**
-     * 正常组员的心跳信息
+     * 姝ｅ父缁勫憳鐨勫績璺充俊鎭�
      */
     private static ConcurrentHashMap<String,HeartBeatModel> _heartNormalData = new ConcurrentHashMap<>(50);
     /**
-     * 删除组员的心跳信息
+     * 鍒犻櫎缁勫憳鐨勫績璺充俊鎭�
      */
     private static ConcurrentHashMap<String,HeartBeatModel> _heartDeleteData = new ConcurrentHashMap<>(50);
 
@@ -53,33 +55,33 @@ public class HeartSingle {
     private ConfigSingle config = ConfigSingle.getInstance();
 
     /**
-     * 用于心跳的socket连接
+     * 鐢ㄤ簬蹇冭烦鐨剆ocket杩炴帴
      */
     private static Socket _socket = null;
 
     private HeartSingle() throws InterruptedException, IOException {
-        // 创建socket--组员，组长的区别
+        // 鍒涘缓socket--缁勫憳锛岀粍闀跨殑鍖哄埆
         CreateSocketInt createSocketInt = new CreateSocketImp();
         try {
             _socket = createSocketInt.createHeartSocketClient(config.getGroupIP(), config.getGroupHeartPort());
         }catch (IOException e){
             Thread  d = new Thread(new HeartCreateThread(this));
-            d.setName("创建心跳socket");
+            d.setName("鍒涘缓蹇冭烦socket");
             d.start();
         }
-        // 副/正组长需要创建心跳管理
+        // 鍓�/姝ｇ粍闀块渶瑕佸垱寤哄績璺崇鐞�
         if(config.getIdentity() == IdentifyEnum.Deputy_GROUP_LEADER || config.getIdentity() == IdentifyEnum.GROUP_LEADER){
             _heartManage = new HeartManageMonitorThread(config.getBindHeartPort());
             Thread  manage = new Thread(_heartManage);
-            manage.setName("心跳管理线程");
+            manage.setName("蹇冭烦绠＄悊绾跨▼");
             manage.start();
         }
     }
 
     /**
-     * 获得对象实例
-     * @return  对象
-     * @throws IOException  io异常
+     * 鑾峰緱瀵硅薄瀹炰緥
+     * @return  瀵硅薄
+     * @throws IOException  io寮傚父
      * @throws InterruptedException --
      */
     public static HeartSingle getInstance() throws IOException, InterruptedException {
@@ -95,15 +97,15 @@ public class HeartSingle {
     }
 
     /**
-     * 当心跳连接时添加到管理集合中
-     * @param socket 心跳连接socket
+     * 褰撳績璺宠繛鎺ユ椂娣诲姞鍒扮鐞嗛泦鍚堜腑
+     * @param socket 蹇冭烦杩炴帴socket
      */
     public void addHeartSocket(HeartKVModel socket){
         _heartSocketList.add(socket);
     }
 
     /**
-     * 执行管理所有心跳--副/正组长执行--每10秒调用此方法
+     * 鎵ц绠＄悊鎵�鏈夊績璺�--鍓�/姝ｇ粍闀挎墽琛�--姣�10绉掕皟鐢ㄦ鏂规硶
      */
     public void manageHeartInfo() {
         Iterator<HeartKVModel> socketIterator = _heartSocketList.iterator();
@@ -135,9 +137,9 @@ public class HeartSingle {
                 }
                 currentSocket.setReadTime(0);
 
-                // 数据是什么还没有定好
+                // 鏁版嵁鏄粈涔堣繕娌℃湁瀹氬ソ
                 String paramStr = Tools.encodeUTF82Str(data);
-                System.out.println("收到心跳"+paramStr);
+                System.out.println("鏀跺埌蹇冭烦"+paramStr);
                 HeartBeatModel heartBeatModel = Tools.json2Bean(paramStr,HeartBeatModel.class);
                 switch (heartBeatModel.getRole().toLowerCase()){
                     case "normal":
@@ -155,21 +157,22 @@ public class HeartSingle {
 
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            } catch (ReadTimeOutException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
         }
     }
 
     /**
-     * 发送心跳信息--每30秒调用此方法
+     * 鍙戦�佸績璺充俊鎭�--姣�30绉掕皟鐢ㄦ鏂规硶
      */
     public void sendHeart(){
         HardDiskCapacity hardDiskCapacity = new HardDiskCapacity();
         hardDiskCapacity = Tools.getDiskSpaceInfo("");
         if(config.getIdentity() == IdentifyEnum.Deputy_GROUP_LEADER || config.getIdentity() == IdentifyEnum.GROUP_LEADER ){
-            // 计算一下组员的空间
+            // 璁＄畻涓�涓嬬粍鍛樼殑绌洪棿
             CalculationSize(hardDiskCapacity);
         }
         try {
@@ -193,7 +196,7 @@ public class HeartSingle {
                 HeartBeatModel beatInfo = new HeartBeatModel(config.getID(),role,config.getGroupNum(),config.getBindEventPort()
                         ,hardDiskCapacity.getTotalCapacity(),hardDiskCapacity.getUsableCapacity(),hardDiskCapacity.getAvailableCapacity());
                 /**
-                 * 设置系统名
+                 * 璁剧疆绯荤粺鍚�
                  */
                 beatInfo.setSysName(OSInfo.getOSName().toString());
                 beatInfo.setConnectNum(10);
@@ -205,11 +208,11 @@ public class HeartSingle {
                 CPUModel cpuModel = systemInfoInt.getCPUInfo();
                 beatInfo.setCPUUsed(0D);
 
-                System.out.println("发送心跳");
+                System.out.println("鍙戦�佸績璺�");
 
                 SocketTools.sendData(_socket, Tools.bean2Json(beatInfo));
             }else{
-                LogTools.writeInfo("心跳socket连接不上。。");
+                LogTools.writeInfo("蹇冭烦socket杩炴帴涓嶄笂銆傘��");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -218,11 +221,11 @@ public class HeartSingle {
     }
 
     /**
-     * 计算正常组员的可用空间
-     * @param hardDiskCapacity 磁盘容量
+     * 璁＄畻姝ｅ父缁勫憳鐨勫彲鐢ㄧ┖闂�
+     * @param hardDiskCapacity 纾佺洏瀹归噺
      */
     private void CalculationSize(HardDiskCapacity hardDiskCapacity) {
-        // 不计算删除组员的大小，副组长带的就是组长的完全备份。
+        // 涓嶈绠楀垹闄ょ粍鍛樼殑澶у皬锛屽壇缁勯暱甯︾殑灏辨槸缁勯暱鐨勫畬鍏ㄥ浠姐��
         long totalSize = 0L;
         long totalUsedSize = 0L;
         HashMap<Integer,HeartBeatModel> groupNumMap = new HashMap<>(50);
@@ -250,9 +253,9 @@ public class HeartSingle {
     }
 
     /**
-     * 判断心跳的socket是否仍然可用
-     * @param reconnect 不可用时是否重连
-     * @return  true可用，false不可用
+     * 鍒ゆ柇蹇冭烦鐨剆ocket鏄惁浠嶇劧鍙敤
+     * @param reconnect 涓嶅彲鐢ㄦ椂鏄惁閲嶈繛
+     * @return  true鍙敤锛宖alse涓嶅彲鐢�
      */
     public boolean availableHeartSocket(boolean reconnect){
         boolean result = false;

@@ -1,5 +1,6 @@
 package com.ansheng.thread.heart;
 
+import com.ansheng.exception.ReadTimeOutException;
 import com.ansheng.factory.CreateSocketInt;
 import com.ansheng.factory.impl.CreateSocketImp;
 import com.ansheng.model.HeartBeatModel;
@@ -36,7 +37,7 @@ public class HeartManageMonitorThread implements Runnable {
             try {
                 Socket socket = heartManageThread.accept();
 
-                // 我需要读取你的 ID
+                // 鎴戦渶瑕佽鍙栦綘鐨� ID
                 byte[] data = SocketTools.receiveData(socket,true);
                 String str ="ID";
 
@@ -49,7 +50,10 @@ public class HeartManageMonitorThread implements Runnable {
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
                 LogTools.writeError(e);
-            }
+            } catch (ReadTimeOutException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
     }
 

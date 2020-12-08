@@ -147,7 +147,7 @@ public class Tools {
      * 0 成功。
      * -1 身份与ID不对应
      * -2 未知身份
-     * @exception  NumberFormatException 字符串转换成int类型异常
+     * @exception  NumberFormatException 字符串转换成int类型异常 
      */
     public static int getConfigFromArgs(String[] strings,boolean writeToFile){
         // id groupNum 身份 组长IP 组长心跳端口 组长事务端口 本机绑定的心跳端口 本机绑定的事务端口

@@ -12,7 +12,7 @@ public interface CreateSocketInt {
      ServerSocket createSocketServer(int port) throws IOException;
 
     /**
-     * 创建一个普通的Socket连接
+     * 	创建一个普通的Socket连接
      * @param ip    IP
      * @param port  端口
      * @return  返回创建好的socket对象
@@ -21,7 +21,7 @@ public interface CreateSocketInt {
     Socket createSocketClient(String ip,int port) throws IOException;
 
     /**
-     * 创建一个心跳socket
+     *	 创建一个心跳socket
      * @param ip ip
      * @param port  端口
      * @return  socket对象

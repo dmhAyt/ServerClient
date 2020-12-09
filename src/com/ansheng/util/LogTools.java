@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import com.ansheng.config.FileWorkerConfig;
+
 public class LogTools {
 
     /**
@@ -19,7 +21,7 @@ public class LogTools {
             String messages = MessageFormat.format("[{0,time}] 消息：{1}\r\n\r\n", new Date(),message);
             String path = Tools.getRunPath("logs/");
             String fileName = path +date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+"_info.txt";
-            FileTools.appendByte(fileName,messages.getBytes("UTF-8"));
+            FileTools.appendByte(fileName,messages.getBytes(FileWorkerConfig.File_Encode_Name));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -40,7 +42,7 @@ public class LogTools {
 
             String path = Tools.getRunPath("logs/");
             String fileName = path + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+"_error.txt";
-            FileTools.appendByte(fileName,messages.getBytes("UTF-8"));
+            FileTools.appendByte(fileName,messages.getBytes(FileWorkerConfig.File_Encode_Name));
         } catch (IOException e) {
             e.printStackTrace();
         }

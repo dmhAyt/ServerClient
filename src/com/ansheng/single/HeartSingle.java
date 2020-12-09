@@ -35,19 +35,19 @@ public class HeartSingle {
     private static final ReentrantLock _objLock = new ReentrantLock();
     private static HeartManageMonitorThread _heartManage = null;
     /**
-     * 缁勯暱鎴栬�呭壇缁勯暱绠＄悊缁勫憳浠殑蹇冭烦socket
+     *	 缁勯暱鎴栬�呭壇缁勯暱绠＄悊缁勫憳浠殑蹇冭烦socket
      */
     private static ConcurrentSkipListSet<HeartKVModel> _heartSocketList = new ConcurrentSkipListSet<>();
     /**
-     * 鍓粍闀跨殑蹇冭烦淇℃伅
+     *	 鍓粍闀跨殑蹇冭烦淇℃伅
      */
     private static ConcurrentHashMap<String,HeartBeatModel> _heartSLeaderData = new ConcurrentHashMap<>(10);
     /**
-     * 姝ｅ父缁勫憳鐨勫績璺充俊鎭�
+     * 	姝ｅ父缁勫憳鐨勫績璺充俊鎭�
      */
     private static ConcurrentHashMap<String,HeartBeatModel> _heartNormalData = new ConcurrentHashMap<>(50);
     /**
-     * 鍒犻櫎缁勫憳鐨勫績璺充俊鎭�
+     * 	鍒犻櫎缁勫憳鐨勫績璺充俊鎭�
      */
     private static ConcurrentHashMap<String,HeartBeatModel> _heartDeleteData = new ConcurrentHashMap<>(50);
 
@@ -55,7 +55,7 @@ public class HeartSingle {
     private ConfigSingle config = ConfigSingle.getInstance();
 
     /**
-     * 鐢ㄤ簬蹇冭烦鐨剆ocket杩炴帴
+     * 	鐢ㄤ簬蹇冭烦鐨剆ocket杩炴帴
      */
     private static Socket _socket = null;
 
@@ -79,7 +79,7 @@ public class HeartSingle {
     }
 
     /**
-     * 鑾峰緱瀵硅薄瀹炰緥
+     *	 鑾峰緱瀵硅薄瀹炰緥
      * @return  瀵硅薄
      * @throws IOException  io寮傚父
      * @throws InterruptedException --
@@ -97,7 +97,7 @@ public class HeartSingle {
     }
 
     /**
-     * 褰撳績璺宠繛鎺ユ椂娣诲姞鍒扮鐞嗛泦鍚堜腑
+     * 	褰撳績璺宠繛鎺ユ椂娣诲姞鍒扮鐞嗛泦鍚堜腑
      * @param socket 蹇冭烦杩炴帴socket
      */
     public void addHeartSocket(HeartKVModel socket){
@@ -105,7 +105,7 @@ public class HeartSingle {
     }
 
     /**
-     * 鎵ц绠＄悊鎵�鏈夊績璺�--鍓�/姝ｇ粍闀挎墽琛�--姣�10绉掕皟鐢ㄦ鏂规硶
+     * 	鎵ц绠＄悊鎵�鏈夊績璺�--鍓�/姝ｇ粍闀挎墽琛�--姣�10绉掕皟鐢ㄦ鏂规硶
      */
     public void manageHeartInfo() {
         Iterator<HeartKVModel> socketIterator = _heartSocketList.iterator();
@@ -136,11 +136,12 @@ public class HeartSingle {
                     continue;
                 }
                 currentSocket.setReadTime(0);
-
+                String ip = currentSocket.getSocketClient().getInetAddress().getHostAddress();
                 // 鏁版嵁鏄粈涔堣繕娌℃湁瀹氬ソ
                 String paramStr = Tools.encodeUTF82Str(data);
                 System.out.println("鏀跺埌蹇冭烦"+paramStr);
                 HeartBeatModel heartBeatModel = Tools.json2Bean(paramStr,HeartBeatModel.class);
+                heartBeatModel.setIP(ip);
                 switch (heartBeatModel.getRole().toLowerCase()){
                     case "normal":
                         _heartNormalData.put(currentSocket.getID(),heartBeatModel);
@@ -166,7 +167,7 @@ public class HeartSingle {
     }
 
     /**
-     * 鍙戦�佸績璺充俊鎭�--姣�30绉掕皟鐢ㄦ鏂规硶
+     *	 鍙戦�佸績璺充俊鎭�--姣�30绉掕皟鐢ㄦ鏂规硶
      */
     public void sendHeart(){
         HardDiskCapacity hardDiskCapacity = new HardDiskCapacity();
@@ -196,7 +197,7 @@ public class HeartSingle {
                 HeartBeatModel beatInfo = new HeartBeatModel(config.getID(),role,config.getGroupNum(),config.getBindEventPort()
                         ,hardDiskCapacity.getTotalCapacity(),hardDiskCapacity.getUsableCapacity(),hardDiskCapacity.getAvailableCapacity());
                 /**
-                 * 璁剧疆绯荤粺鍚�
+                 *	 璁剧疆绯荤粺鍚�
                  */
                 beatInfo.setSysName(OSInfo.getOSName().toString());
                 beatInfo.setConnectNum(10);
@@ -221,7 +222,22 @@ public class HeartSingle {
     }
 
     /**
-     * 璁＄畻姝ｅ父缁勫憳鐨勫彲鐢ㄧ┖闂�
+     * 	通过key获得心跳信息
+     * @param key
+     * @return
+     */
+    public HeartBeatModel getHeartModelByKey(String key) {
+    	HeartBeatModel result = null;
+    	if(_heartSLeaderData.containsKey(key)) {
+    		result = _heartSLeaderData.get(key);
+    	}else if(_heartNormalData.containsKey(key)) {
+    		result = _heartNormalData.get(key);
+    	}
+    	return result;
+    }
+    
+    /**
+     * 	璁＄畻姝ｅ父缁勫憳鐨勫彲鐢ㄧ┖闂�
      * @param hardDiskCapacity 纾佺洏瀹归噺
      */
     private void CalculationSize(HardDiskCapacity hardDiskCapacity) {
@@ -253,7 +269,7 @@ public class HeartSingle {
     }
 
     /**
-     * 鍒ゆ柇蹇冭烦鐨剆ocket鏄惁浠嶇劧鍙敤
+     * 	鍒ゆ柇蹇冭烦鐨剆ocket鏄惁浠嶇劧鍙敤
      * @param reconnect 涓嶅彲鐢ㄦ椂鏄惁閲嶈繛
      * @return  true鍙敤锛宖alse涓嶅彲鐢�
      */

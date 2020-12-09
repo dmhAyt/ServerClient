@@ -3,7 +3,7 @@ package com.ansheng.model;
 public class HeartBeatModel {
 
     /**
-     * 心跳维持功能:
+     *  	心跳维持功能:
      * 	1. 需要发送的信息：
      * 		1） 机器的唯一ID。
      * 		2） 机器的IP(从连接中可以获得)
@@ -79,7 +79,11 @@ public class HeartBeatModel {
      * CPU使用情况。
      */
     private double CPUUsed;
-
+    /**
+     * 	绑定的IP
+     */
+    private String IP;
+    
     public String getID() {
         return ID;
     }
@@ -89,7 +93,7 @@ public class HeartBeatModel {
     }
 
     /**
-     * 构造器
+     * 	构造器
      * @param role 身份
      * @param groupNum 组内编号
      * @param FP    处理绑定的端口
@@ -198,4 +202,14 @@ public class HeartBeatModel {
     public void setCPUUsed(double CPUUsed) {
         this.CPUUsed = CPUUsed;
     }
+
+	public String getIP() {
+		return IP;
+	}
+
+	public void setIP(String iP) {
+		IP = iP;
+	}
+    
+    
 }

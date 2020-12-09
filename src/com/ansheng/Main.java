@@ -7,6 +7,7 @@ import com.ansheng.single.ThreadPoolSingle;
 import com.ansheng.thread.EventManageThread;
 import com.ansheng.thread.heart.HeartManageThread;
 import com.ansheng.thread.heart.HeartSendThread;
+import com.ansheng.util.OSInfo;
 import com.ansheng.util.Tools;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ import java.util.Objects;
 public class Main {
     public static void main(String[] args) {
         //args = new String[]{"l0001", "1","leader","127.0.0.1","5206", "5207", "5204" ,"5205"};
-
+    	
         // 获得配置
         boolean configResult =  GetConfig(args);
         if(!configResult) return;
@@ -41,7 +42,7 @@ public class Main {
 
         // 运行事务端口监听
         Thread eventThread = new Thread(new EventManageThread());
-        eventThread.setName("浜嬪姟绾跨▼");
+        eventThread.setName("事务监听线程");
         eventThread.start();
 
         try {

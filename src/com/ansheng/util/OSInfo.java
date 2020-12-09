@@ -135,4 +135,19 @@ public class OSInfo {
         return System.getProperty(name).toLowerCase();
     }
 
+    /**
+     * 获得不同系统的换行符
+     * @return 返回换行符
+     */
+    public static String getPartLine() {
+    	return System.getProperty("line.separator", "\n");
+    }
+    /**
+     * 获得各个系统的路径分隔符
+     * @return
+     */
+    public static String getFilePart() {
+    	return System.getProperty("file.separator", "/");
+    }
+    
 }

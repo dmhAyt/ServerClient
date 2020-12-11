@@ -1,15 +1,16 @@
 package com.ansheng.factory.impl;
 
-import com.ansheng.factory.SystemInfoInt;
-import com.ansheng.model.hardware.CPUModel;
-import com.ansheng.model.hardware.HardDiskCapacity;
-import com.ansheng.model.hardware.MemoryModel;
-import com.ansheng.model.hardware.NetWorkModel;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import com.ansheng.factory.SystemInfoInt;
+import com.ansheng.model.hardware.CPUModel;
+import com.ansheng.model.hardware.HardDiskCapacity;
+import com.ansheng.model.hardware.MemoryModel;
+import com.ansheng.model.hardware.MountInfo;
+import com.ansheng.model.hardware.NetWorkModel;
 
 public class WindowsInfoImpl implements SystemInfoInt {
     @Override
@@ -45,7 +46,30 @@ public class WindowsInfoImpl implements SystemInfoInt {
         return null;
     }
 
+    @Override
+    public List<MountInfo> getDiskInfo(List<String> exclude) {
+    	// TODO Auto-generated method stub
+    	if(exclude == null) exclude = new ArrayList<String>();
+    	List<MountInfo> result = new ArrayList<MountInfo>();
+    	List<String> partInfos = getDiskPartition();
+    	
+    	for(String item : partInfos) {
+    		if(exclude.contains(item)) continue;
+            File file = new File(item);
+            MountInfo param = new MountInfo();
+            param.setMountName("");
+            param.setMountPath(item);
+            param.setMountRemark("");
+            param.setAvailableCapacity(file.getFreeSpace());
+            param.setUsableCapacity(file.getTotalSpace()-file.getFreeSpace());
+            param.setTotalCapacity(file.getTotalSpace());
+            result.add(param);
+    	}
+    	
+    	return result;
+    }
 
+    
     /**
      * 获得windows下的所有盘符
      * @return 所有的盘符
@@ -59,4 +83,6 @@ public class WindowsInfoImpl implements SystemInfoInt {
         }
         return  result;
     }
+
+
 }

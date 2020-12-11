@@ -1,8 +1,11 @@
 package com.ansheng.factory;
 
+import java.util.List;
+
 import com.ansheng.model.hardware.CPUModel;
 import com.ansheng.model.hardware.HardDiskCapacity;
 import com.ansheng.model.hardware.MemoryModel;
+import com.ansheng.model.hardware.MountInfo;
 import com.ansheng.model.hardware.NetWorkModel;
 
 public interface SystemInfoInt {
@@ -30,4 +33,11 @@ public interface SystemInfoInt {
      * @return
      */
     MemoryModel getMemoryInfo();
+    
+    /**
+     * 获得盘符或者挂载点的大小及可用大小
+     * @param exclude	需要排除的盘符或者挂载点
+     * @return	返回容量信息
+     */
+    List<MountInfo> getDiskInfo(List<String> exclude);
 }

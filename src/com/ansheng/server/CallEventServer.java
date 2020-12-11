@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Objects;
 
+import com.ansheng.constant.MethodCodeConstant;
+import com.ansheng.constant.StatusCodeConstant;
 import com.ansheng.exception.ReadTimeOutException;
 import com.ansheng.factory.CreateSocketInt;
 import com.ansheng.factory.impl.CreateSocketImp;
@@ -54,7 +56,7 @@ public class CallEventServer {
 		sendIndentify.setOriginServer(orig);
 		
 		String param  = Tools.bean2Json(sendIndentify);
-		SocketTools.sendData(socket, param,1000);
+		SocketTools.sendData(socket, param,MethodCodeConstant.Delete_Code);
 		
 		// 接收一个回应
 		ResultSocket codeResult = null;
@@ -88,5 +90,85 @@ public class CallEventServer {
 		return methodResult;
 	}
 	
+	/**
+	 * 通知到组长服务器
+	 * @param ip	组长服务器的IP或者跟踪服务器的IP
+	 * @param port	组长服务器的端口或者跟踪服务器的端口
+	 * @param dataStr	需要发送给上级的数据，结构为：文件的唯一码|文件名【含路径】|文件大小|MD5|sha|上传的用户ID|组员ID[n0001|d0001|l0001|s0001]
+	 * @param identifyModel	身份，如果是内部通信可以不用Token
+	 * @return	返回成功或者失败。
+	 * @throws IOException
+	 */
+	public boolean callUploadFinish(String ip,int port,String dataStr,IdentifyModel identifyModel) throws IOException {
+		// 创建一个socket
+		Socket socket = null;
+		try {
+			socket = _createSocket.createSocketClient(ip, port);
+		}catch(IOException ioe) {
+			ioe.printStackTrace();
+			return false;
+		}
+		
+		// 发送链接请求
+		String param  = Tools.bean2Json(identifyModel);
+		SocketTools.sendData(socket, param,MethodCodeConstant.Up_Finish_Code);
+		String[] params  = null;
+		
+		int times = 3;
+		while(times-->0) {
+			try {
+				ResultSocket resultSocket = SocketTools.receiveDataMethod(socket, true);
+				String rStr = Tools.encodeUTF82Str(resultSocket.getMethodParam());
+				params = rStr.split("|");
+				
+				switch(Integer.parseInt(params[0])){
+					case StatusCodeConstant.Method_Err_State:
+						return false;
+					case StatusCodeConstant.This_Err_State:
+						return false;
+					case StatusCodeConstant.Repeat_Data_State:
+						return false;
+					case StatusCodeConstant.This_Succ_State:
+						break;
+					case StatusCodeConstant.Method_Succ_State:
+						return true;
+					default:
+						return false;
+				}
+			} catch (ReadTimeOutException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} 
+		if(times <= 0) return false;
+		
+		SocketTools.sendData(socket,dataStr);
+		
+		
+		try {
+			ResultSocket resultSocket = SocketTools.receiveDataMethod(socket, true);
+			String rStr = Tools.encodeUTF82Str(resultSocket.getMethodParam());
+			params = rStr.split("|");
+			
+			switch(Integer.parseInt(params[0])){
+				case StatusCodeConstant.Method_Err_State:
+					return false;
+				case StatusCodeConstant.This_Err_State:
+					return false;
+				case StatusCodeConstant.Repeat_Data_State:
+					return false;
+				case StatusCodeConstant.This_Succ_State:
+					return true;
+				case StatusCodeConstant.Method_Succ_State:
+					return true;
+				default:
+					return false;
+			}
+		} catch (ReadTimeOutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
 	
 }

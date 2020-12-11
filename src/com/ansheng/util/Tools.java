@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -96,6 +97,43 @@ public class Tools {
         return value;
     }
 
+    /**
+     * 将long类型转为byte[] 类型
+     * @param param
+     * @return
+     */
+    public static byte[] longToByte(long param) {
+    	ByteBuffer _buffer = ByteBuffer.allocate(8); 
+    	_buffer.putLong(param);
+    	return _buffer.array();
+    }
+    /***
+     * 将byte[] 类型转为 long类型
+     * @param param
+     * @return
+     */
+    public static long bytesToLong(byte[] param) {
+		ByteBuffer buffer = ByteBuffer.allocate(8); 
+		buffer.put(param, 0, param.length);
+	    //flip方法将Buffer从写模式切换到读模式，调用flip()方法会将position设回0，从头读起
+	    buffer.flip();
+	    return buffer.getLong();
+    }
+    /**
+     * 将byte[] 类型转为long类型
+     * @param param	数组
+     * @param begin	开始位置
+     * @param length	长度
+     * @return
+     */
+    public static long bytesToLong(byte[] param,int begin,int length) {
+    	ByteBuffer buffer = ByteBuffer.allocate(8); 
+		buffer.put(param, begin, length);
+	    //flip方法将Buffer从写模式切换到读模式，调用flip()方法会将position设回0，从头读起
+	    buffer.flip();
+	    return buffer.getLong();
+    }
+    
     /**
      * 使用阿里的fastJson把对象转成json字符串。
      * @param obj   对象数据

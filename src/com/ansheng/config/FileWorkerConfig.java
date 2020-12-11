@@ -41,4 +41,39 @@ public class FileWorkerConfig {
      * 启用数据库备份。
      */
     public static boolean Back_Up_Db_Enable = true;
+    /**
+     * 是否启用sha摘要。0表示不启用。1表示使用sha1;256表示使用sha-256;384表示使用sha-384
+     */
+    public static int Enable_Sha = 0;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }

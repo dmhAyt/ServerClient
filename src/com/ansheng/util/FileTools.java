@@ -80,12 +80,41 @@ public class FileTools {
         CheckArgument(fileName,create);
         if(beginIndex < 0) throw new IllegalArgumentException("文件开始位置不能为0");
         try(RandomAccessFile randomAccessFile = new RandomAccessFile(new File(fileName),"w")){
-            if(randomAccessFile.length() < beginIndex) new IllegalArgumentException("开始位置不能大于文件大.");
-            randomAccessFile.seek(beginIndex);
-            randomAccessFile.write(bytes);
+        	writeByte(randomAccessFile,bytes,beginIndex,0,bytes.length);
         }
     }
 
+    /**
+     * 	写字节到文件中
+     * @param fileName 文件名
+     * @param bytes 字节数组
+     * @param beginIndex    写入文件的开始位置。
+     * @param create    如果文件不存在时是否需要创建。【包括文件夹】
+     * @throws IOException  文件异常
+     */
+    public static void writeByte(String fileName,byte[] bytes,long beginIndex,int byteIndex,int byteLength,boolean create) throws IOException {
+        CheckArgument(fileName,create);
+        if(beginIndex < 0) throw new IllegalArgumentException("文件开始位置不能为0");
+        try(RandomAccessFile randomAccessFile = new RandomAccessFile(new File(fileName),"w")){
+        	writeByte(randomAccessFile,bytes,beginIndex,byteIndex,byteLength);
+        }
+    }
+    
+    /**
+     * 	写字节到文件中
+     * @param fileName 文件名
+     * @param bytes 字节数组
+     * @param beginIndex    写入文件的开始位置。
+     * @param create    如果文件不存在时是否需要创建。【包括文件夹】
+     * @throws IOException  文件异常
+     */
+    public static void writeByte(RandomAccessFile randomAccessFile,byte[] bytes,long beginIndex,int byteIndex,int byteLength) throws IOException {
+        if(beginIndex < 0) throw new IllegalArgumentException("文件开始位置不能为0");
+        if(randomAccessFile.length() < beginIndex) new IllegalArgumentException("开始位置不能大于文件大.");
+        randomAccessFile.seek(beginIndex);
+        randomAccessFile.write(bytes,byteIndex,byteLength);
+    }
+    
     /**
      * 	读文件里面的所有内容，--字符
      * @param fileName  文件名
@@ -206,7 +235,19 @@ public class FileTools {
 	public static boolean fileExist(String filePath) {
 		return Files.exists(Paths.get(filePath), LinkOption.NOFOLLOW_LINKS);
 	}
-
+	
+	/**
+	 * 如果文件不存在创建一个，否则直接返回
+	 * @param filePath
+	 * @return
+	 * @throws IOException 
+	 */
+	public static File fileCreate(String filePath) throws IOException {
+		File file = new File(filePath);
+		if(!file.exists()) file.createNewFile();
+		return file;
+	} 
+	
 	/**
 	 * 	读取文件的长度
 	 * @param filePath
@@ -219,5 +260,23 @@ public class FileTools {
 		}
 		return 0L;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }

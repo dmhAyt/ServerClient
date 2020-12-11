@@ -2,6 +2,7 @@ package com.ansheng.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class FileRecordInfoModel extends FileUploadInfoModel{
@@ -13,7 +14,7 @@ public class FileRecordInfoModel extends FileUploadInfoModel{
 	/**
 	 * 	备份的组员唯一ID列表	【n0001,n0002】
 	 */
-	private List<String> BackUpIDs = new ArrayList<String>(10);
+	private HashSet<String> BackUpIDs =new HashSet<String>(10);
 	/**
 	 * 	文件下载的次数。
 	 */
@@ -27,23 +28,21 @@ public class FileRecordInfoModel extends FileUploadInfoModel{
 	
 	
 	
-	public FileRecordInfoModel(FileUploadInfoModel model , int fileState, List<String> backUpIDs,
+	public FileRecordInfoModel(FileUploadInfoModel model , int fileState,
 			int fileDownLoadNum) {
 		super(model.getFileID(), model.getFileName(), model.getFileLength(), model.getFileMD5()
 				, model.getShaStr(), model.getUploadTime(), model.getUploadUser(), model.getFileLocalPath());
 		FileState = fileState;
-		BackUpIDs = backUpIDs;
 		FileDownLoadNum = fileDownLoadNum;
 	}
 
 
 	
 	public FileRecordInfoModel(String fileID, String fileName, long fileLength, String fileMD5, String shaStr,
-			LocalDateTime uploadTime, String uploadUser, String fileLocalPath, int fileState, List<String> backUpIDs,
+			LocalDateTime uploadTime, String uploadUser, String fileLocalPath, int fileState, 
 			int fileDownLoadNum) {
 		super(fileID, fileName, fileLength, fileMD5, shaStr, uploadTime, uploadUser, fileLocalPath);
 		FileState = fileState;
-		BackUpIDs = backUpIDs;
 		FileDownLoadNum = fileDownLoadNum;
 	}
 
@@ -71,7 +70,7 @@ public class FileRecordInfoModel extends FileUploadInfoModel{
 	 * 	可能为多个。
 	 * @return
 	 */
-	public List<String> getBackUpIDs() {
+	public HashSet<String> getBackUpIDs() {
 		return BackUpIDs;
 	}
 	
@@ -81,8 +80,12 @@ public class FileRecordInfoModel extends FileUploadInfoModel{
 	 * 	可能为多个。
 	 * @return
 	 */
-	public void setBackUpIDs(List<String> backUpIDs) {
+	public void setBackUpIDs(HashSet<String> backUpIDs) {
 		BackUpIDs = backUpIDs;
+	}
+	
+	public void addBackUpIDs(String memberID) {
+		BackUpIDs.add(memberID);
 	}
 	
 	/**

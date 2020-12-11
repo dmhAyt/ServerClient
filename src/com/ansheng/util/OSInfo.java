@@ -144,6 +144,7 @@ public class OSInfo {
     }
     /**
      * 获得各个系统的路径分隔符
+     * Linux下为/；Windows下为\\
      * @return
      */
     public static String getFilePart() {

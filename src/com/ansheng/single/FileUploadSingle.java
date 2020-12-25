@@ -14,6 +14,7 @@ import com.ansheng.config.DaVersionConfig;
 import com.ansheng.config.FileWorkerConfig;
 import com.ansheng.model.FileRecordInfoModel;
 import com.ansheng.model.FileUploadInfoModel;
+import com.ansheng.sqlite.UploadRecordTable;
 import com.ansheng.util.FileTools;
 import com.ansheng.util.OSInfo;
 
@@ -22,10 +23,20 @@ public class FileUploadSingle {
 	private static final ReentrantLock _objLock = new ReentrantLock();
 	private static FileUploadSingle _instance = null;
 	private static Map<String,FileUploadInfoModel> _data = new HashMap<String, FileUploadInfoModel>();
+	private static UploadRecordTable _uploadTable = null;
 	
+
 	private FileUploadSingle() {
-		
-		
+		_uploadTable = new UploadRecordTable(); 
+		java.util.List<FileUploadInfoModel> lst = null;
+		try {
+			lst = _uploadTable.findAllRows();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(FileUploadInfoModel model : lst)
+			_data.put(model.getFileID(), model);
 	}
 	
 	/**
@@ -54,6 +65,8 @@ public class FileUploadSingle {
 	 */
 	public void addParam(FileUploadInfoModel param) {
 		_data.put(param.getFileID(), param);
+		// 写入文件和数据库
+		_uploadTable.insertRow(param);
 	}
 	
 	/**
@@ -67,6 +80,7 @@ public class FileUploadSingle {
 			result = _data.get(key);
 			_data.remove(key);
 		}
+		_uploadTable.deleteData(" and FileID = '"+key+"'");
 		return result;
 	}
 	

@@ -14,6 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.ansheng.config.DaVersionConfig;
 import com.ansheng.config.FileWorkerConfig;
 import com.ansheng.model.FileRecordInfoModel;
+import com.ansheng.sqlite.RecordTable;
 import com.ansheng.util.FileTools;
 import com.ansheng.util.OSInfo;
 
@@ -22,10 +23,19 @@ public class FileRecordSingle {
 	private static final ReentrantLock _objLock = new ReentrantLock();
 	private static FileRecordSingle _instance = null;
 	private static Map<String,FileRecordInfoModel> _data = new HashMap<String, FileRecordInfoModel>();
+	private static RecordTable _recordTable = new RecordTable(); 
 	
 	private FileRecordSingle() {
 		
-		
+		java.util.List<FileRecordInfoModel> lst = null;
+		try {
+			lst = _recordTable.findAllRows();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(FileRecordInfoModel model : lst)
+			_data.put(model.getFileID(), model);
 	}
 	
 	/**
@@ -53,6 +63,8 @@ public class FileRecordSingle {
 	 */
 	public void addParam(FileRecordInfoModel param) {
 		_data.put(param.getFileID(), param);
+		// 写入文件和写入数据库
+		_recordTable.insertRow(param);
 	}
 	
 	/**
@@ -66,6 +78,8 @@ public class FileRecordSingle {
 			result = _data.get(key);
 			_data.remove(key);
 		}
+		// 写入文件和写入数据库
+		_recordTable.deleteData(" and FileID = '"+key+"'");
 		return result;
 	}
 	

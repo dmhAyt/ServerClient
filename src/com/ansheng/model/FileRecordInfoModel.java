@@ -104,6 +104,9 @@ public class FileRecordInfoModel extends FileUploadInfoModel{
 		if(len > Integer.MAX_VALUE) this.FileDownLoadNum = 0;
 		FileDownLoadNum += 1;
 	}
+	public void setFileDownLoadNum(int downNum) {
+		FileDownLoadNum = downNum;
+	}
 
 	@Override
 	public String toString() {

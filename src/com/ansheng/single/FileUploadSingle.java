@@ -28,15 +28,6 @@ public class FileUploadSingle {
 
 	private FileUploadSingle() {
 		_uploadTable = new UploadRecordTable(); 
-		java.util.List<FileUploadInfoModel> lst = null;
-		try {
-			lst = _uploadTable.findAllRows();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		for(FileUploadInfoModel model : lst)
-			_data.put(model.getFileID(), model);
 	}
 	
 	/**
@@ -67,6 +58,16 @@ public class FileUploadSingle {
 		_data.put(param.getFileID(), param);
 		// 写入文件和数据库
 		_uploadTable.insertRow(param);
+	}
+	
+	/**
+	 * 	将文件加入到内存中--不加入表
+	 * @param param
+	 */
+	public void addParam(FileUploadInfoModel param,Boolean toTable) {
+		_data.put(param.getFileID(), param);
+		if(toTable)
+			_uploadTable.insertRow(param);
 	}
 	
 	/**

@@ -62,9 +62,18 @@ public class FileRecordSingle {
 	 * @param param
 	 */
 	public void addParam(FileRecordInfoModel param) {
+		addParam(param,true);
+	}
+	
+	/**
+	 * 	将文件加入到内存中
+	 * @param param
+	 */
+	public void addParam(FileRecordInfoModel param,Boolean toTable) {
 		_data.put(param.getFileID(), param);
 		// 写入文件和写入数据库
-		_recordTable.insertRow(param);
+		if(toTable)
+			_recordTable.insertRow(param);
 	}
 	
 	/**

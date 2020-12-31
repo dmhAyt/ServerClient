@@ -4,12 +4,14 @@ import com.ansheng.constant.MethodCodeConstant;
 import com.ansheng.constant.StatusCodeConstant;
 import com.ansheng.distribute.FileDistribute;
 import com.ansheng.exception.ReadTimeOutException;
+import com.ansheng.model.BackupsModel;
 import com.ansheng.model.FileRecordInfoModel;
 import com.ansheng.model.FileUploadInfoModel;
 import com.ansheng.model.HeartBeatModel;
 import com.ansheng.model.event.IdentifyModel;
 import com.ansheng.model.socket.ResultSocket;
 import com.ansheng.myenum.IdentifyEnum;
+import com.ansheng.single.BackupsSingle;
 import com.ansheng.single.ConfigSingle;
 import com.ansheng.single.FileRecordSingle;
 import com.ansheng.single.FileUploadSingle;
@@ -32,11 +34,14 @@ public class EventServer {
 	private FileUploadSingle _fileUpload = null;
 	private HeartSingle _heartSingle = null;
 	private ConfigSingle _conConfigSingle = null;
+	private BackupsSingle _backupsSingle = null;
 	
+
 	public EventServer() {
 		_fileRecord = FileRecordSingle.getInstance();
 		_fileUpload = FileUploadSingle.getInstance();
 		_conConfigSingle = ConfigSingle.getInstance();
+		_backupsSingle = BackupsSingle.instance();
 		try {
 			_heartSingle = HeartSingle.getInstance();
 		} catch (IOException e) {
@@ -377,7 +382,11 @@ public class EventServer {
 			if (Objects.equals(md5, fileUpload.getFileMD5())) {
 				try {
 					// 加入到备份队列中
-					// 通知上级，上传文件完成。
+					if(_conConfigSingle.getIdentity() != IdentifyEnum.GROUP_NORMAL) {
+						BackupsModel model = new BackupsModel(fileUpload.getFileID(),(byte)0);
+						_backupsSingle.addModel(model); 
+					}
+					
 					IdentifyModel sendIndentify = new IdentifyModel();
 					sendIndentify.setToken("");
 					sendIndentify.setUserCode(_conConfigSingle.getID());
@@ -388,6 +397,7 @@ public class EventServer {
 					String dataParam = fileUpload.getFileID()+"|"+fileUpload.getFileName()+"|"+fileUpload.getFileLength()+"|"
 							+fileUpload.getFileMD5()+"|"+fileUpload.getShaStr()+"|"+fileUpload.getUploadUser()+"|"+_conConfigSingle.getID();
 					
+					// 通知上级
 					CallEventServer callServer = new CallEventServer();
 					boolean flage = callServer.callUploadFinish(_conConfigSingle.getGroupIP(),_conConfigSingle.getGroupEventPort()
 							,dataParam,sendIndentify);
